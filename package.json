@@ -1,0 +1,37 @@
+{
+	"name": "user-service",
+	"version": "1.0.0",
+	"scripts": {
+		"build": "npx tsc",
+		"start": "node dist/index.js",
+		"dev": "nodemon src/index.ts | npx pino-pretty"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rso-magisterium/user-service.git"
+	},
+	"author": "Miha Meglic <miha@meglic.dev>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/rso-magisterium/user-service/issues"
+	},
+	"homepage": "https://github.com/rso-magisterium/user-service#readme",
+	"description": "",
+	"dependencies": {
+		"@prisma/client": "^6.0.1",
+		"dotenv": "^16.4.7",
+		"express": "^4.21.2",
+		"pino": "^9.5.0"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.0",
+		"@types/node": "^22.10.1",
+		"concurrently": "^9.1.0",
+		"nodemon": "^3.1.7",
+		"pino-pretty": "^13.0.0",
+		"prisma": "^6.0.1",
+		"ts-node": "^10.9.2",
+		"tsx": "^4.19.2",
+		"typescript": "^5.7.2"
+	}
+}
