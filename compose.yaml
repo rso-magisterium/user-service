@@ -2,30 +2,33 @@ services:
   server:
     build:
       context: .
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: "mongodb+srv://root:verysecretpassword@db/user?retryWrites=true"
     ports:
       - 3000:3000
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://users-svc:verysecretpassword@db/user-service?schema=public"
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
   db:
-    image: mongo
+    image: postgres:17
     restart: always
-    user: mongo
-    secrets:
-      - db-password
+    ports:
+      - 5432:5432
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: verysecretpassword
+      POSTGRES_USER: users-svc
+      POSTGRES_PASSWORD: verysecretpassword
+      POSTGRES_DB: user-service
     healthcheck:
-      test: ["CMD", "pg_isready"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready", "-d", "user-service"]
+      interval: 30s
+      timeout: 60s
       retries: 5
+      start_period: 80s
 
 volumes:
   db-data:
