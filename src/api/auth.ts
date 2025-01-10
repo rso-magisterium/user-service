@@ -14,7 +14,7 @@ const router = Router();
 const prisma = new PrismaClient();
 
 if (process.env.JWT_SECRET == null) {
-  logger.error("JWT token is not set");
+  logger.error("JWT secret is not set");
   process.exit(100);
 }
 

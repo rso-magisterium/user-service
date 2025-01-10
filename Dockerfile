@@ -9,6 +9,8 @@ RUN apk add --no-cache openssl
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 
+COPY prisma ./prisma/
+
 ################################################################################
 # Create a stage for installing production dependecies.
 FROM base as deps
@@ -18,7 +20,6 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
-COPY ./prisma ./prisma
 RUN npx prisma generate
 
 ################################################################################
