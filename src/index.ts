@@ -7,7 +7,10 @@ import { json } from "body-parser";
 import cookies from "cookie-parser";
 import passport from "passport";
 import prisma from "./prisma";
+import swaggerJsdoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
+import apiDoc from "./apiDoc";
 import logger from "./logger";
 import api from "./api/routes";
 
@@ -32,6 +35,16 @@ app.get("/healthz", async (req, res) => {
 
   res.status(200).json({ message: "OK", uptime: process.uptime() });
 });
+
+app.get("/api/openapi.json", (req, res) => {
+  res.send(swaggerJsdoc({ definition: apiDoc, apis: ["./{src,dist}/api/*.{js,ts}"] }));
+});
+
+app.use(
+  "/api/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(undefined, undefined, undefined, undefined, undefined, "/api/openapi.json")
+);
 
 app.listen(port, () => {
   logger.info(`User service is running at http://localhost:${port}`);

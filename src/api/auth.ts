@@ -21,6 +21,42 @@ if (process.env.JWT_SECRET == null) {
 
 const jwtSecret = process.env.JWT_SECRET;
 
+/**
+ * @openapi
+ * "/api/auth/login":
+ *   post:
+ *     summary: "User login"
+ *     tags: [Authentication]
+ *     requestBody:
+ *       description: "User credentials"
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required: [email, password]
+ *     responses:
+ *       "200":
+ *         description: "Login successful"
+ *         headers:
+ *           Set-Cookie:
+ *             description: "JWT Token"
+ *             schema:
+ *               type: string
+ *               example: Cookie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Response"
+ *       "401":
+ *         $ref: "#/components/responses/Unauthorized"
+ *       "500":
+ *         $ref: "#/components/responses/ServerError"
+ */
 router.post("/login", async (req, res) => {
   const email: string = req.body.email;
   const password: string = req.body.password;
@@ -70,6 +106,42 @@ router.post("/login", async (req, res) => {
   });
 });
 
+/**
+ * @openapi
+ * "/api/auth/register":
+ *   post:
+ *     summary: "User registration"
+ *     tags: [Authentication]
+ *     requestBody:
+ *       description: "User data"
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required: [name, email, password]
+ *     responses:
+ *       "200":
+ *         description: "User created"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Response"
+ *       "400":
+ *         description: "Bad request (missing parameters or user already exists)"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Response"
+ *       "500":
+ *         $ref: "#/components/responses/ServerError"
+ */
 router.post("/register", async (req, res) => {
   const name: string = req.body.name;
   const email: string = req.body.email;
@@ -111,6 +183,14 @@ router.post("/register", async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * "/api/auth/github":
+ *   get:
+ *     summary: "GitHub OAuth2 authentication"
+ *     description: "Redirect user here to begin authentication flow"
+ *     tags: [Authentication]
+ */
 router.get("/github", async (req, res) => {
   // TODO: Replace req.headers.host with req.hostname
   let redirect_uri = `${req.protocol}://${req.headers.host}${req.baseUrl}/github/callback`;
@@ -148,6 +228,7 @@ router.get("/github/callback", async (req, res) => {
       // expectedState: state,
     });
 
+    // Fetch user data
     let resUser = await fetch("https://api.github.com/user", {
       method: "GET",
       headers: {
@@ -170,12 +251,14 @@ router.get("/github/callback", async (req, res) => {
       return;
     }
 
+    // Extract user data
     let ghUser: GithubUser = await resUser.json();
     let ghEmails: GithubEmails = await resEmail.json();
 
     logger.debug({ request: { path: req.originalUrl }, user: ghUser, emails: ghEmails }, "User authenticated");
     let ghEmail = ghEmails.filter((mail) => mail.primary && mail.verified)[0].email;
 
+    // Get user
     let user = await prisma.user.findFirst({ where: { email: ghEmail } });
     if (user) {
       let curProvider = await prisma.userProvider.findFirst({
