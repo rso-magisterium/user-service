@@ -41,6 +41,16 @@ const apiDoc: OpenAPIV3.Document = {
       },
     },
     responses: {
+      MissingParameters: {
+        description: "Missing required parameters",
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/Response",
+            },
+          },
+        },
+      },
       Unauthorized: {
         description: "Unauthenticated",
         content: {
