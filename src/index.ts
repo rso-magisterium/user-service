@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import express, { Express } from "express";
+import express, { Express, Request } from "express";
 import cors from "cors";
 import { json } from "body-parser";
 import cookies from "cookie-parser";
 import passport from "passport";
+import { Strategy, ExtractJwt } from "passport-jwt";
 import prisma from "./prisma";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
@@ -17,10 +18,49 @@ import api from "./api/routes";
 const app: Express = express();
 const port = process.env.PORT;
 
+if (process.env.JWT_SECRET == null) {
+  logger.error("JWT secret is not set");
+  process.exit(100);
+}
+
+let tokenExtractor = (req: Request) => {
+  if (req.signedCookies) {
+    return req.signedCookies.jwt;
+  } else {
+    return ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+  }
+};
+
+passport.use(
+  new Strategy(
+    {
+      secretOrKey: process.env.JWT_SECRET,
+      jwtFromRequest: tokenExtractor,
+    },
+    async (payload, done) => {
+      const user = await prisma.user.findUnique({
+        where: { email: payload.email },
+        select: {
+          id: true,
+          email: true,
+          superAdmin: true,
+          name: true,
+          password: false,
+        },
+      });
+      if (user) {
+        return done(null, user);
+      } else {
+        return done(null, false);
+      }
+    }
+  )
+);
+
 app.use(cors({ origin: "*" }));
 app.use(json());
 app.use(cookies(process.env.COOKIE_SECRET));
-// app.use(express.static(__dirname + "/public"));
+app.use(passport.initialize());
 
 app.use("/api", api);
 
