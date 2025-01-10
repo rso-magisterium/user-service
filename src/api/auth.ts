@@ -4,14 +4,15 @@ import passport, { use } from "passport";
 import * as oidc from "openid-client";
 import { getGithubConfig } from "../oidcConfig";
 import bcrypt from "bcrypt";
-import { PrismaClient, Prisma, User } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 import type { GithubUser } from "../models/github/user";
 import type { GithubEmails } from "../models/github/emails";
 
+import prisma from "../prisma";
+
 const router = Router();
-const prisma = new PrismaClient();
 
 if (process.env.JWT_SECRET == null) {
   logger.error("JWT secret is not set");
