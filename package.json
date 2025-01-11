@@ -1,6 +1,6 @@
 {
 	"name": "user-service",
-	"version": "0.1.1",
+	"version": "1.0.0",
 	"scripts": {
 		"build": "npx tsc",
 		"start": "prisma migrate deploy && node dist/index.js",
