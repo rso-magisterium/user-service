@@ -10,7 +10,7 @@ const router = Router();
  * @openapi
  * "/api/tenant":
  *   post:
- *     summary: Create tennant
+ *     summary: Create tenant
  *     tags: [Tenant]
  *     security:
  *       - cookieAuth: []
@@ -78,10 +78,7 @@ router.post("/", passport.authenticate("jwt", { session: false }), async (req, r
         name: tenantName,
         adminId: admin.id,
         users: {
-          create: {
-            userId: admin.id,
-            assignedById: req.user?.id as string,
-          },
+          connect: { id: admin.id },
         },
       },
     });
@@ -108,6 +105,74 @@ router.post("/", passport.authenticate("jwt", { session: false }), async (req, r
 
 /**
  * @openapi
+ * "/api/tenant/{tenantId}/users":
+ *   get:
+ *     summary: Get tenant users
+ *     tags: [Tenant]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tenantId
+ *     responses:
+ *       200:
+ *         description: Users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/User"
+ *       401:
+ *         $ref: "#/components/responses/Unauthorized"
+ *       403:
+ *         $ref: "#/components/responses/Forbidden"
+ *       404:
+ *         description: Tenant doesn't exist
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Response"
+ *       500:
+ *         $ref: "#/components/responses/ServerError"
+ */
+router.get("/:tenantId/users", passport.authenticate("jwt", { session: false }), async (req, res) => {
+  let tenantId: string = req.params.tenantId;
+
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+  });
+
+  if (!tenant) {
+    logger.debug({ request: { path: req.originalUrl, body: req.body } }, "Tenant doesn't exist");
+    res.status(404).json({ message: "Tenant doesn't exist" });
+    return;
+  }
+
+  if (req.user?.superAdmin === false && tenant.adminId !== req.user?.id) {
+    logger.debug({ request: { path: req.originalUrl }, user: req.user }, "User is not Super Admin or Tenant Admin");
+    res.status(403).json({ message: "You must be the tenant administrator" });
+    return;
+  }
+
+  const users = await prisma.user.findMany({
+    where: { tenants: { some: { id: tenant.id } } },
+    select: {
+      id: true,
+      email: true,
+      superAdmin: true,
+      name: true,
+      password: false,
+    },
+  });
+
+  logger.info({ request: { path: req.originalUrl }, tenant: tenant }, "Tenant users requested");
+  res.json(users);
+});
+
+/**
+ * @openapi
  * "/api/tenant/{tenantId}/user":
  *   post:
  *     summary: Add user to tenant
@@ -115,8 +180,11 @@ router.post("/", passport.authenticate("jwt", { session: false }), async (req, r
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tenantId
  *     requestBody:
- *       description: "User information"
+ *       description: User information
  *       content:
  *         application/json:
  *           schema:
@@ -178,11 +246,12 @@ router.post("/:tenantId/user", passport.authenticate("jwt", { session: false }),
   }
 
   try {
-    await prisma.tenantUser.create({
+    await prisma.tenant.update({
+      where: { id: tenant.id },
       data: {
-        tenantId: tenant.id,
-        userId: user.id,
-        assignedById: req.user?.id as string,
+        users: {
+          connect: { id: user.id },
+        },
       },
     });
 
@@ -215,8 +284,11 @@ router.post("/:tenantId/user", passport.authenticate("jwt", { session: false }),
  *     security:
  *       - cookieAuth: []
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: tenantId
  *     requestBody:
- *       description: "User information"
+ *       description: User information
  *       content:
  *         application/json:
  *           schema:
@@ -278,11 +350,11 @@ router.delete("/:tenantId/user", passport.authenticate("jwt", { session: false }
   }
 
   try {
-    await prisma.tenantUser.delete({
-      where: {
-        tenantId_userId: {
-          tenantId: tenant.id,
-          userId: user.id,
+    await prisma.tenant.update({
+      where: { id: tenant.id },
+      data: {
+        users: {
+          disconnect: { id: user.id },
         },
       },
     });

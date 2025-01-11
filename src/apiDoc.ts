@@ -27,7 +27,7 @@ const apiDoc: OpenAPIV3.Document = {
       User: {
         type: "object",
         properties: {
-          uuid: {
+          id: {
             type: "string",
           },
           name: {
@@ -36,8 +36,11 @@ const apiDoc: OpenAPIV3.Document = {
           email: {
             type: "string",
           },
+          superAdmin: {
+            type: "boolean",
+          },
         },
-        required: ["uuid", "email"],
+        required: ["id", "email", "superAdmin"],
       },
     },
     responses: {

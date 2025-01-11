@@ -16,8 +16,8 @@ model User {
   providers      UserProvider[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
-  tenants        TenantUser[]
-  adminOfTenants Tenant[]
+  tenants        Tenant[]
+  adminOfTenants Tenant[]       @relation("tenantAdmin")
 }
 
 model UserProvider {
@@ -34,20 +34,9 @@ model UserProvider {
 }
 
 model Tenant {
-  id      String       @id @default(uuid()) @map("_id") @db.Uuid
-  name    String       @unique
-  admin   User         @relation(fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  adminId String       @db.Uuid
-  users   TenantUser[]
-}
-
-model TenantUser {
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  tenantId     String   @db.Uuid
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId       String   @db.Uuid
-  assignedById String   @db.Uuid
-  assignedAt   DateTime @default(now())
-
-  @@id([tenantId, userId])
+  id      String @id @default(uuid()) @map("_id") @db.Uuid
+  name    String @unique
+  admin   User   @relation(name: "tenantAdmin", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  adminId String @db.Uuid
+  users   User[]
 }
