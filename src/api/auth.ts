@@ -97,6 +97,7 @@ router.post("/login", async (req, res) => {
     if (result) {
       let token = jwt.sign(
         {
+          id: user.id,
           name: user.name,
           email: user.email,
           superAdmin: user.superAdmin,
@@ -236,6 +237,7 @@ router.post("/token", passport.authenticate("jwt", { session: false }), async (r
 
   let token = jwt.sign(
     {
+      id: req.user?.id,
       name: req.user?.name,
       email: req.user?.email,
       superAdmin: req.user?.superAdmin,
@@ -367,6 +369,7 @@ router.get("/github/callback", async (req, res) => {
 
     let token = jwt.sign(
       {
+        id: user.id,
         name: user.name,
         email: user.email,
         superAdmin: user.superAdmin,
