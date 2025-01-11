@@ -1,8 +1,13 @@
+import "reflect-metadata";
 import { buildSchemaSync } from "type-graphql";
-
-import { UserResolver } from "./user";
-import { TenantResolver } from "./tenant";
+import {
+  UserCrudResolver,
+  TenantCrudResolver,
+  UserRelationsResolver,
+  TenantRelationsResolver,
+} from "@generated/type-graphql";
 
 export default buildSchemaSync({
-  resolvers: [UserResolver, TenantResolver],
+  resolvers: [UserCrudResolver, TenantCrudResolver, UserRelationsResolver, TenantRelationsResolver],
+  validate: false,
 });

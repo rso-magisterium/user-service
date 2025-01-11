@@ -72,6 +72,7 @@ app.use(
   "/graphql",
   graphqlHTTP({
     schema,
+    context: { prisma },
   })
 );
 
