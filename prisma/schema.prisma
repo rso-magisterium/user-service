@@ -8,18 +8,21 @@ datasource db {
 }
 
 model User {
-  id        String         @id @default(uuid()) @map("_id") @db.Uuid
-  email     String         @unique
-  name      String?
-  password  String?
-  providers UserProvider[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id             String         @id @default(uuid()) @map("_id") @db.Uuid
+  email          String         @unique
+  superAdmin     Boolean        @default(false)
+  name           String?
+  password       String?
+  providers      UserProvider[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  tenants        Tenant[]
+  adminOfTenants Tenant[]       @relation("tenantAdmin")
 }
 
 model UserProvider {
   id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId      String   @db.Uuid
   provider    String
   providerId  String
@@ -28,4 +31,12 @@ model UserProvider {
   updatedAt   DateTime @updatedAt
 
   @@unique([provider, providerId])
+}
+
+model Tenant {
+  id      String @id @default(uuid()) @map("_id") @db.Uuid
+  name    String @unique
+  admin   User   @relation(name: "tenantAdmin", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  adminId String @db.Uuid
+  users   User[]
 }

@@ -1,14 +1,13 @@
 import { Router } from "express";
 import logger from "../logger";
-import passport, { use } from "passport";
 import * as oidc from "openid-client";
 import { getGithubConfig } from "../oidcConfig";
 import bcrypt from "bcrypt";
 import { Prisma } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
-import type { GithubUser } from "../models/github/user";
-import type { GithubEmails } from "../models/github/emails";
+import type { GithubUser } from "../types/github/user";
+import type { GithubEmails } from "../types/github/emails";
 
 import prisma from "../prisma";
 
@@ -52,6 +51,8 @@ const jwtSecret = process.env.JWT_SECRET;
  *           application/json:
  *             schema:
  *               $ref: "#/components/schemas/Response"
+ *       "400":
+ *         $ref: "#/components/responses/MissingParameters"
  *       "401":
  *         $ref: "#/components/responses/Unauthorized"
  *       "500":
@@ -134,11 +135,7 @@ router.post("/login", async (req, res) => {
  *             schema:
  *               $ref: "#/components/schemas/Response"
  *       "400":
- *         description: "Bad request (missing parameters or user already exists)"
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/Response"
+ *         $ref: "#/components/responses/MissingParameters"
  *       "500":
  *         $ref: "#/components/responses/ServerError"
  */
