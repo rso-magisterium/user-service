@@ -15,7 +15,7 @@ import { graphqlHTTP } from "express-graphql";
 import apiDoc from "./apiDoc";
 import logger from "./logger";
 import api from "./api/routes";
-import schema from "./models/graphql/User";
+import schema from "./graphql/graphql";
 
 const app: Express = express();
 const port = process.env.PORT;

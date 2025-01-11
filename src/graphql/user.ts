@@ -1,8 +1,10 @@
 // @ts-nocheck
 import "reflect-metadata";
-import { ObjectType, Field, ID, buildSchemaSync, Resolver, Query, Arg } from "type-graphql";
-import prisma from "../../prisma";
-import logger from "../../logger";
+import { ObjectType, Field, ID, buildSchemaSync, Resolver, Query, Arg, Resolver } from "type-graphql";
+import prisma from "../prisma";
+import logger from "../logger";
+
+import { Tenant } from "./tenant";
 
 @ObjectType()
 export class User {
@@ -16,6 +18,12 @@ export class User {
   name?: string;
 
   @Field()
+  superAdmin: boolean;
+
+  @Field(() => [Tenant])
+  tenants: Tenant[];
+
+  @Field()
   createdAt: Date;
 
   @Field()
@@ -26,11 +34,7 @@ export class User {
 export class UserResolver {
   @Query((returns) => User)
   async user(@Arg("id") id: string) {
-    const user = await prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
+    const user = await prisma.user.findUnique({ where: { id }, include: { tenants: true } });
 
     if (!user) {
       throw new Error(`User not found: ${id}`);
@@ -42,17 +46,9 @@ export class UserResolver {
 
   @Query((returns) => [User])
   async allUsers() {
-    const users = await prisma.user.findMany();
-
-    if (!users) {
-      throw new Error(`User not found: ${id}`);
-    }
+    const users = await prisma.user.findMany({ include: { tenants: true } });
 
     logger.debug({ graphql: { resolver: "User", query: "allUsers" } }, "Request processed");
     return users;
   }
 }
-
-export default buildSchemaSync({
-  resolvers: [UserResolver],
-});
