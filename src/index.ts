@@ -10,10 +10,12 @@ import { Strategy, ExtractJwt } from "passport-jwt";
 import prisma from "./prisma";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
+import { graphqlHTTP } from "express-graphql";
 
 import apiDoc from "./apiDoc";
 import logger from "./logger";
 import api from "./api/routes";
+import schema from "./graphql/graphql";
 
 const app: Express = express();
 const port = process.env.PORT;
@@ -65,6 +67,14 @@ app.use(cookies(process.env.COOKIE_SECRET));
 app.use(passport.initialize());
 
 app.use("/api", api);
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema,
+    context: { prisma },
+  })
+);
 
 app.get("/healthz", async (req, res) => {
   try {
