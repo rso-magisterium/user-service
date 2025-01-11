@@ -9,6 +9,8 @@ CREATE TABLE "Tenant" (
     "_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "adminId" UUID NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Tenant_pkey" PRIMARY KEY ("_id")
 );
