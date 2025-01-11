@@ -74,6 +74,16 @@ const apiDoc: OpenAPIV3.Document = {
           },
         },
       },
+      NotFound: {
+        description: "Not Found",
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/Response",
+            },
+          },
+        },
+      },
       ServerError: {
         description: "Server error",
         content: {

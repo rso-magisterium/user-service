@@ -1,5 +1,6 @@
 import { Router } from "express";
 import logger from "../logger";
+import passport from "passport";
 import * as oidc from "openid-client";
 import { getGithubConfig } from "../oidcConfig";
 import bcrypt from "bcrypt";
@@ -94,7 +95,15 @@ router.post("/login", async (req, res) => {
     }
 
     if (result) {
-      let token = jwt.sign({ name: user.name, email: user.email }, jwtSecret, { expiresIn: "2 days" });
+      let token = jwt.sign(
+        {
+          name: user.name,
+          email: user.email,
+          superAdmin: user.superAdmin,
+        },
+        jwtSecret,
+        { expiresIn: "2 days" }
+      );
 
       logger.info({ request: { path: req.originalUrl }, user: { email } }, "Login successful");
       res
@@ -178,6 +187,65 @@ router.post("/register", async (req, res) => {
     logger.error({ request: { path: req.originalUrl }, user: { name, email }, error: err }, "User creation failed");
     res.status(500).json({ message: "User creation failed", error: err });
   }
+});
+
+/**
+ * @openapi
+ * "/api/auth/token":
+ *   get:
+ *     summary: Get user API token
+ *     tags: [Authentication]
+ *     security:
+ *       - cookieAuth: []
+ *       - bearerAuth: []
+ *     requestBody:
+ *       description: Token data
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               expiration:
+ *                 type: integer
+ *                 description: Token expiration in days
+ *                 minimum: 1
+ *                 maximum: 30
+ *     responses:
+ *       200:
+ *         description: JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       "400":
+ *         $ref: "#/components/responses/MissingParameters"
+ *       401:
+ *         $ref: "#/components/responses/Unauthorized"
+ */
+router.post("/token", passport.authenticate("jwt", { session: false }), async (req, res) => {
+  const expiration: number = req.body.expiration || 1;
+
+  if (expiration < 1 || expiration > 30) {
+    logger.debug({ request: { path: req.originalUrl, body: req.body } }, "Parameter out of range (expiration)");
+    res.status(400).json({ message: "Token expiration is out of range" });
+    return;
+  }
+
+  let token = jwt.sign(
+    {
+      name: req.user?.name,
+      email: req.user?.email,
+      superAdmin: req.user?.superAdmin,
+    },
+    jwtSecret,
+    { expiresIn: `${expiration} days` }
+  );
+
+  logger.info({ request: { path: req.originalUrl }, user: req.user }, `Token issued (expiration: ${expiration} days)`);
+  res.json({ token });
 });
 
 /**
@@ -297,7 +365,15 @@ router.get("/github/callback", async (req, res) => {
       });
     }
 
-    let token = jwt.sign({ name: user.name, email: user.email }, jwtSecret, { expiresIn: "2 days" });
+    let token = jwt.sign(
+      {
+        name: user.name,
+        email: user.email,
+        superAdmin: user.superAdmin,
+      },
+      jwtSecret,
+      { expiresIn: "2 days" }
+    );
 
     logger.info({ request: { path: req.originalUrl }, user: { email: user.email } }, "User authorized via GitHub");
     res

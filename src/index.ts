@@ -24,11 +24,13 @@ if (process.env.JWT_SECRET == null) {
 }
 
 let tokenExtractor = (req: Request) => {
-  if (req.signedCookies) {
+  let token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+
+  if (req.signedCookies && token == null) {
     return req.signedCookies.jwt;
-  } else {
-    return ExtractJwt.fromAuthHeaderAsBearerToken()(req);
   }
+
+  return token;
 };
 
 passport.use(
