@@ -40,9 +40,6 @@ RUN npm run build
 # where the necessary files are copied from the build stage.
 FROM base as final
 
-LABEL org.opencontainers.image.source="https://github.com/rso-magisterium/user-service"
-LABEL org.opencontainers.image.version="0.1.0"
-
 ENV NODE_ENV production
 ENV PORT 3000
 

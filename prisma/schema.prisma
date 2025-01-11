@@ -2,30 +2,59 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator typegraphql {
+  provider       = "typegraphql-prisma"
+  emitIdAsIDType = true
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String         @id @default(uuid()) @map("_id") @db.Uuid
-  email     String         @unique
-  name      String?
-  password  String?
-  providers UserProvider[]
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id             String         @id @default(uuid()) @map("_id") @db.Uuid
+  email          String         @unique
+  /// @TypeGraphQL.omit(input: true)
+  superAdmin     Boolean        @default(false)
+  name           String?
+  /// @TypeGraphQL.omit(output: true, input: true)
+  password       String?
+  /// @TypeGraphQL.omit(input: true)
+  providers      UserProvider[]
+  tenants        Tenant[]
+  /// @TypeGraphQL.omit(input: true)
+  adminOfTenants Tenant[]       @relation("tenantAdmin")
+  /// @TypeGraphQL.omit(input: true)
+  createdAt      DateTime       @default(now())
+  /// @TypeGraphQL.omit(input: true)
+  updatedAt      DateTime       @updatedAt
 }
 
 model UserProvider {
   id          Int      @id @default(autoincrement())
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId      String   @db.Uuid
   provider    String
   providerId  String
+  /// @TypeGraphQL.omit(output: true, input: true)
   accessToken String
+  /// @TypeGraphQL.omit(input: true)
   createdAt   DateTime @default(now())
+  /// @TypeGraphQL.omit(input: true)
   updatedAt   DateTime @updatedAt
 
   @@unique([provider, providerId])
+}
+
+model Tenant {
+  id        String   @id @default(uuid()) @map("_id") @db.Uuid
+  name      String   @unique
+  admin     User     @relation(name: "tenantAdmin", fields: [adminId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  adminId   String   @db.Uuid
+  users     User[]
+  /// @TypeGraphQL.omit(input: true)
+  createdAt DateTime @default(now())
+  /// @TypeGraphQL.omit(input: true)
+  updatedAt DateTime @updatedAt
 }
