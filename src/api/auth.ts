@@ -193,7 +193,7 @@ router.post("/register", async (req, res) => {
 /**
  * @openapi
  * "/api/auth/token":
- *   get:
+ *   post:
  *     summary: Get user API token
  *     tags: [Authentication]
  *     security:

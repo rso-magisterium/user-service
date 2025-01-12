@@ -3,7 +3,7 @@
 	"version": "1.0.1",
 	"scripts": {
 		"build": "npx tsc",
-		"start": "prisma migrate deploy && node dist/index.js",
+		"start": "prisma migrate deploy && node --no-warnings dist/index.js",
 		"dev": "concurrently --kill-others \"nodemon src/index.ts | npx pino-pretty\" \"npx ruru -SPe http://localhost:3000/graphql\"",
 		"format": "npx prettier src --write"
 	},
