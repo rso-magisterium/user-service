@@ -83,7 +83,7 @@ router.get("/", passport.authenticate("jwt", { session: false }), async (req, re
 
 /**
  * @openapi
- * "/api/user/tenant":
+ * "/api/user/tenants":
  *   get:
  *     summary: Get user tenants
  *     tags: [User]
