@@ -119,6 +119,37 @@ router.post("/login", async (req, res) => {
 
 /**
  * @openapi
+ * "/api/auth/logout":
+ *   get:
+ *     summary: "User logout"
+ *     tags: [Authentication]
+ *     responses:
+ *       "200":
+ *         description: "Logout successful"
+ *         headers:
+ *           Set-Cookie:
+ *             description: "JWT Token Expire"
+ *             schema:
+ *               type: string
+ *               example: Cookie
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Response"
+ *       "400":
+ *         $ref: "#/components/responses/MissingParameters"
+ *       "401":
+ *         $ref: "#/components/responses/Unauthorized"
+ *       "500":
+ *         $ref: "#/components/responses/ServerError"
+ */
+router.get("/logout", async (req, res) => {
+  logger.info({ request: { path: req.originalUrl }, user: req.user }, "Logout successful");
+  res.clearCookie("jwt").json({ message: "Logout successful" });
+});
+
+/**
+ * @openapi
  * "/api/auth/register":
  *   post:
  *     summary: "User registration"
