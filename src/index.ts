@@ -61,7 +61,7 @@ passport.use(
   )
 );
 
-app.use(cors({ origin: "*" }));
+app.use(cors({ origin: process.env.ORIGIN || "*", credentials: true }));
 app.use(json());
 app.use(cookies(process.env.COOKIE_SECRET));
 app.use(passport.initialize());
