@@ -18,4 +18,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and publish Docker image
-        run: chmod +x docker-build.sh && ./docker-build.sh
+        run: bash docker-build.sh
