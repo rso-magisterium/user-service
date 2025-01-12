@@ -166,6 +166,9 @@ router.post("/register", async (req, res) => {
   // Hash password
   let hashedPassword = await bcrypt.hash(password, 10);
 
+  // Check if there are any users
+  const users = await prisma.user.findMany({});
+
   try {
     // Create user
     await prisma.user.create({
@@ -173,6 +176,7 @@ router.post("/register", async (req, res) => {
         name: name,
         email: email,
         password: hashedPassword,
+        superAdmin: users.length === 0,
       },
     });
 
