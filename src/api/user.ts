@@ -83,7 +83,7 @@ router.get("/", passport.authenticate("jwt", { session: false }), async (req, re
 
 /**
  * @openapi
- * "/api/user/tenant":
+ * "/api/user/tenants":
  *   get:
  *     summary: Get user tenants
  *     tags: [User]
@@ -95,6 +95,7 @@ router.get("/", passport.authenticate("jwt", { session: false }), async (req, re
  *         description: User tenants
  *         content:
  *           application/json:
+ *             schema:
  *               type: array
  *               items:
  *                 type: object
@@ -131,6 +132,9 @@ router.get("/tenants", passport.authenticate("jwt", { session: false }), async (
  *     parameters:
  *       - in: path
  *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
  *         description: User details
@@ -187,11 +191,15 @@ router.get("/:userId", passport.authenticate("jwt", { session: false }), async (
  *     parameters:
  *       - in: path
  *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
  *         description: User tenants
  *         content:
  *           application/json:
+ *             schema:
  *               type: array
  *               items:
  *                 type: object

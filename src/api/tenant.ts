@@ -115,6 +115,9 @@ router.post("/", passport.authenticate("jwt", { session: false }), async (req, r
  *     parameters:
  *       - in: path
  *         name: tenantId
+ *         schema:
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
  *         description: Users
@@ -183,6 +186,9 @@ router.get("/:tenantId/users", passport.authenticate("jwt", { session: false }),
  *     parameters:
  *       - in: path
  *         name: tenantId
+ *         schema:
+ *           type: string
+ *         required: true
  *     requestBody:
  *       description: User information
  *       content:
@@ -287,6 +293,9 @@ router.post("/:tenantId/user", passport.authenticate("jwt", { session: false }),
  *     parameters:
  *       - in: path
  *         name: tenantId
+ *         schema:
+ *           type: string
+ *         required: true
  *     requestBody:
  *       description: User information
  *       content:
