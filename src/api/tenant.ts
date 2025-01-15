@@ -24,9 +24,9 @@ const router = Router();
  *             properties:
  *               name:
  *                 type: string
- *               adminId:
+ *               adminEmail:
  *                 type: string
- *             required: [name, adminId]
+ *             required: [name, adminEmail]
  *     responses:
  *       200:
  *         description: Tenant created
