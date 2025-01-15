@@ -416,16 +416,16 @@ router.get("/github/callback", async (req, res) => {
     logger.info({ request: { path: req.originalUrl }, user: { email: user.email } }, "User authorized via GitHub");
     res
       .cookie("jwt", token, { httpOnly: true, signed: true, sameSite: "strict", maxAge: 48 * 60 * 60 * 1000 })
-      .json({ message: "Authentication success" });
+      .redirect("/");
   } catch (err: any) {
     if (err.code && err.code === "OAUTH_INVALID_RESPONSE") {
-      logger.warn({ request: { path: req.originalUrl } }, "GitHub: Invalid response");
-      res.status(401).json({ message: "Authentication reponse is invalid" });
+      logger.warn({ request: { path: req.originalUrl }, error: err }, "GitHub: Invalid response");
+      res.redirect("/login");
       return;
     }
 
-    logger.error(err, "GitHub: Authentication failed");
-    res.status(500).json({ message: "Authentication failed" });
+    logger.info({ request: { path: req.originalUrl }, error: err }, "GitHub: Authentication failed");
+    res.redirect("/login");
     return;
   }
 });
