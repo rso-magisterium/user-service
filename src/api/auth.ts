@@ -325,6 +325,7 @@ router.get("/github/callback", async (req, res) => {
 
     // TODO: Replace req.headers.host with req.hostname
     let currentUrl = new URL(`${req.protocol}://${req.headers.host}${req.originalUrl}`);
+    logger.debug({ request: { path: req.originalUrl } }, `Current URL: ${currentUrl}`);
     let tokens = await oidc.authorizationCodeGrant(config, currentUrl, {
       // pkceCodeVerifier: code_verifier,
       // expectedState: state,
